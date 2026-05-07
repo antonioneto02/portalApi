@@ -2,17 +2,32 @@
 const cargaModel = require('../models/cargaModel');
 const logger = require('../../logger');
 
+function getDataHojeBR() {
+  const fmt = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date());
+  const y = fmt.find(p => p.type === 'year').value;
+  const m = fmt.find(p => p.type === 'month').value;
+  const d = fmt.find(p => p.type === 'day').value;
+  return `${y}${m}${d}`; // yyyymmdd
+}
+
 async function buscarItens(req, res) {
   try {
-    const { filial, pedido, carga } = req.query;
+    const { carga, filial, pedido, produto, qtdLibMin, qtdLibMax } = req.query;
     let itens;
     if (carga) {
       itens = await cargaModel.buscarItensPorCarga(carga.trim());
-    } else if (pedido) {
-      itens = await cargaModel.buscarItensPorPedido(filial ? filial.trim() : null, pedido.trim());
     } else {
-      // Nenhum pedido nem carga informado: retornar registros de hoje com C9_NFISCAL vazio
-      itens = await cargaModel.buscarItensHojeSemNfiscal();
+      const filtros = {
+        filial:    filial    ? filial.trim()           : null,
+        pedido:    pedido    ? pedido.trim()           : null,
+        produto:   produto   ? produto.trim()          : null,
+        qtdLibMin: qtdLibMin !== undefined && qtdLibMin !== '' ? parseFloat(qtdLibMin) : null,
+        qtdLibMax: qtdLibMax !== undefined && qtdLibMax !== '' ? parseFloat(qtdLibMax) : null,
+      };
+      itens = await cargaModel.buscarItensHojeSemNfiscal(getDataHojeBR(), filtros);
     }
     res.json(itens);
   } catch (err) {

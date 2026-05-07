@@ -50,24 +50,35 @@ async function limparCarga(recno) {
   return result.rowsAffected[0];
 }
 
-async function buscarItensHojeSemNfiscal() {
+async function buscarItensHojeSemNfiscal(dataHoje, { filial, pedido, produto, qtdLibMin, qtdLibMax } = {}) {
   const pool = await getPool();
-  const result = await pool.request().query(`
+  const req = pool.request().input('dataHoje', sql.Char(8), dataHoje);
+
+  let filtros = `D_E_L_E_T_ = ''
+      AND CONVERT(CHAR(8), TRY_CONVERT(DATE, C9_DATALIB, 112), 112) = @dataHoje
+      AND RTRIM(C9_NFISCAL) = ''`;
+
+  if (filial)  { req.input('filial',  sql.VarChar, filial);  filtros += ` AND RTRIM(C9_FILIAL)  LIKE '%' + @filial  + '%'`; }
+  if (pedido)  { req.input('pedido',  sql.VarChar, pedido);  filtros += ` AND RTRIM(C9_PEDIDO)  LIKE '%' + @pedido  + '%'`; }
+  if (produto) { req.input('produto', sql.VarChar, produto); filtros += ` AND RTRIM(C9_PRODUTO) LIKE '%' + @produto + '%'`; }
+  if (qtdLibMin != null) { req.input('qtdMin', sql.Decimal(18, 4), qtdLibMin); filtros += ` AND C9_QTDLIB >= @qtdMin`; }
+  if (qtdLibMax != null) { req.input('qtdMax', sql.Decimal(18, 4), qtdLibMax); filtros += ` AND C9_QTDLIB <= @qtdMax`; }
+
+  const result = await req.query(`
     SELECT
       RTRIM(C9_FILIAL)  AS C9_FILIAL,
       RTRIM(C9_PEDIDO)  AS C9_PEDIDO,
       RTRIM(C9_ITEM)    AS C9_ITEM,
       RTRIM(C9_PRODUTO) AS C9_PRODUTO,
       C9_QTDLIB,
-      CONVERT(VARCHAR(10), TRY_CONVERT(DATE, RTRIM(C9_DATALIB), 112), 23) AS C9_DATALIB,
+      CONVERT(VARCHAR(10), TRY_CONVERT(DATE, C9_DATALIB, 112), 23) AS C9_DATALIB,
       RTRIM(C9_NFISCAL) AS C9_NFISCAL,
       RTRIM(C9_CARGA)   AS C9_CARGA,
       RTRIM(C9_SEQCAR)  AS C9_SEQCAR,
       R_E_C_N_O_
     FROM SC9010 WITH(NOLOCK)
-    WHERE D_E_L_E_T_ = ''
-      AND RTRIM(C9_DATALIB) = CONVERT(VARCHAR(8), GETDATE(), 112)
-      AND RTRIM(C9_NFISCAL) = ''
+    WHERE ${filtros}
+    ORDER BY C9_FILIAL, C9_PEDIDO, C9_ITEM
   `);
   return result.recordset;
 }
