@@ -53,11 +53,21 @@ async function limparCarga(recno) {
 async function buscarItensHojeSemNfiscal() {
   const pool = await getPool();
   const result = await pool.request().query(`
-    SELECT C9_FILIAL, C9_PEDIDO, C9_ITEM, C9_PRODUTO, C9_QTDLIB, C9_DATALIB, C9_NFISCAL, C9_CARGA, C9_SEQCAR, R_E_C_N_O_
+    SELECT
+      RTRIM(C9_FILIAL)  AS C9_FILIAL,
+      RTRIM(C9_PEDIDO)  AS C9_PEDIDO,
+      RTRIM(C9_ITEM)    AS C9_ITEM,
+      RTRIM(C9_PRODUTO) AS C9_PRODUTO,
+      C9_QTDLIB,
+      CONVERT(VARCHAR(10), TRY_CONVERT(DATE, RTRIM(C9_DATALIB), 112), 23) AS C9_DATALIB,
+      RTRIM(C9_NFISCAL) AS C9_NFISCAL,
+      RTRIM(C9_CARGA)   AS C9_CARGA,
+      RTRIM(C9_SEQCAR)  AS C9_SEQCAR,
+      R_E_C_N_O_
     FROM SC9010 WITH(NOLOCK)
-    WHERE 1=1
-      AND C9_DATALIB = CONVERT(DATE,GETDATE())
-      AND C9_NFISCAL = ''
+    WHERE D_E_L_E_T_ = ''
+      AND RTRIM(C9_DATALIB) = CONVERT(VARCHAR(8), GETDATE(), 112)
+      AND RTRIM(C9_NFISCAL) = ''
   `);
   return result.recordset;
 }
