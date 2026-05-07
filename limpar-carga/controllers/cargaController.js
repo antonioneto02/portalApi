@@ -2,17 +2,6 @@
 const cargaModel = require('../models/cargaModel');
 const logger = require('../../logger');
 
-function getDataHojeBR() {
-  const fmt = new Intl.DateTimeFormat('pt-BR', {
-    timeZone: 'America/Sao_Paulo',
-    year: 'numeric', month: '2-digit', day: '2-digit',
-  }).formatToParts(new Date());
-  const y = fmt.find(p => p.type === 'year').value;
-  const m = fmt.find(p => p.type === 'month').value;
-  const d = fmt.find(p => p.type === 'day').value;
-  return `${y}${m}${d}`; // yyyymmdd
-}
-
 async function buscarItens(req, res) {
   try {
     const { carga, filial, pedido, produto, qtdLibMin, qtdLibMax } = req.query;
@@ -20,14 +9,13 @@ async function buscarItens(req, res) {
     if (carga) {
       itens = await cargaModel.buscarItensPorCarga(carga.trim());
     } else {
-      const filtros = {
-        filial:    filial    ? filial.trim()           : null,
-        pedido:    pedido    ? pedido.trim()           : null,
-        produto:   produto   ? produto.trim()          : null,
+      itens = await cargaModel.buscarItensHojeSemNfiscal({
+        filial:    filial    ? filial.trim()    : null,
+        pedido:    pedido    ? pedido.trim()    : null,
+        produto:   produto   ? produto.trim()   : null,
         qtdLibMin: qtdLibMin !== undefined && qtdLibMin !== '' ? parseFloat(qtdLibMin) : null,
         qtdLibMax: qtdLibMax !== undefined && qtdLibMax !== '' ? parseFloat(qtdLibMax) : null,
-      };
-      itens = await cargaModel.buscarItensHojeSemNfiscal(getDataHojeBR(), filtros);
+      });
     }
     res.json(itens);
   } catch (err) {

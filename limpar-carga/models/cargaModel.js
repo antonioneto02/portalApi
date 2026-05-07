@@ -50,12 +50,12 @@ async function limparCarga(recno) {
   return result.rowsAffected[0];
 }
 
-async function buscarItensHojeSemNfiscal(dataHoje, { filial, pedido, produto, qtdLibMin, qtdLibMax } = {}) {
+async function buscarItensHojeSemNfiscal({ filial, pedido, produto, qtdLibMin, qtdLibMax } = {}) {
   const pool = await getPool();
-  const req = pool.request().input('dataHoje', sql.Char(8), dataHoje);
+  const req = pool.request();
 
   let filtros = `D_E_L_E_T_ = ''
-      AND C9_DATALIB = CONVERT(DATE, @dataHoje, 112)
+      AND C9_DATALIB = CONVERT(DATE, GETDATE())
       AND C9_NFISCAL = ''`;
 
   if (filial)  { req.input('filial',  sql.VarChar, filial);  filtros += ` AND RTRIM(C9_FILIAL)  LIKE '%' + @filial  + '%'`; }
