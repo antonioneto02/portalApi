@@ -55,7 +55,7 @@ async function buscarItensHojeSemNfiscal({ filial, pedido, produto, qtdLibMin, q
   const req = pool.request();
 
   let filtros = `D_E_L_E_T_ = ''
-      AND C9_DATALIB = CONVERT(DATE, GETDATE())
+      AND C9_DATALIB = CONVERT(VARCHAR(8), GETDATE(), 112)
       AND C9_NFISCAL = ''`;
 
   if (filial)  { req.input('filial',  sql.VarChar, filial);  filtros += ` AND RTRIM(C9_FILIAL)  LIKE '%' + @filial  + '%'`; }
