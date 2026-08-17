@@ -1,6 +1,9 @@
 'use strict';
 require('dotenv').config();
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 const compression = require('compression');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -39,6 +42,12 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ erro: 'Erro interno do servidor.' });
 });
 
-app.listen(PORT, () => {
-  logger.info(`Portal API rodando em http://localhost:${PORT}`);
+const CERT_DIR = 'C:\\Projetos\\Certificados';
+const sslOptions = {
+  key: fs.readFileSync(path.join(CERT_DIR, 'cini.key')),
+  cert: fs.readFileSync(path.join(CERT_DIR, 'cini.crt')),
+};
+
+https.createServer(sslOptions, app).listen(PORT, () => {
+  logger.info(`Portal API rodando em https://localhost:${PORT}`);
 });
