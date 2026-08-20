@@ -42,7 +42,7 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ erro: 'Erro interno do servidor.' });
 });
 
-const CERT_DIR = 'C:\\Projetos\\Certificados';
+const CERT_DIR = process.env.CERT_DIR || 'C:\\Projetos\\Certificados';
 const sslOptions = {
   key: fs.readFileSync(path.join(CERT_DIR, 'cini.key')),
   cert: fs.readFileSync(path.join(CERT_DIR, 'cini.crt')),

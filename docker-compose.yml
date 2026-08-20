@@ -1,0 +1,16 @@
+services:
+  portal-api:
+    image: portal-api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: portal-api
+    restart: unless-stopped
+    ports:
+      - "3014:3014"
+    env_file:
+      - .env
+    environment:
+      CERT_DIR: C:/certs
+    volumes:
+      - C:/Projetos/Certificados:C:/certs:ro
