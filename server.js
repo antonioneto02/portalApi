@@ -13,6 +13,7 @@ const politicasRoutes      = require('./politicas-desconto/routes');
 const limparCargaRoutes    = require('./limpar-carga/routes');
 const ajusteSequenciaRoutes = require('./ajuste-sequencia/routes');
 const canaisVendaRoutes    = require('./canais-venda/routes');
+const vendedoresTabelaPrecoRoutes = require('./vendedores-tabela-preco/routes');
 
 const app = express();
 const PORT = process.env.PORT || 3014;
@@ -38,6 +39,7 @@ app.use('/api', politicasRoutes);
 app.use('/api', limparCargaRoutes);
 app.use('/api', ajusteSequenciaRoutes);
 app.use('/api', canaisVendaRoutes);
+app.use('/api', vendedoresTabelaPrecoRoutes);
 
 app.use((err, _req, res, _next) => {
   logger.error('Erro não tratado: %s', err.stack || err.message);
