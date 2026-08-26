@@ -3,4 +3,3 @@ logs/
 .env
 *.log
 npm-debug.log*
-package-lock.json
