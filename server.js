@@ -12,6 +12,7 @@ const logger = require('./logger');
 const politicasRoutes      = require('./politicas-desconto/routes');
 const limparCargaRoutes    = require('./limpar-carga/routes');
 const ajusteSequenciaRoutes = require('./ajuste-sequencia/routes');
+const canaisVendaRoutes    = require('./canais-venda/routes');
 
 const app = express();
 const PORT = process.env.PORT || 3014;
@@ -36,6 +37,7 @@ app.get('/health', (_req, res) =>
 app.use('/api', politicasRoutes);
 app.use('/api', limparCargaRoutes);
 app.use('/api', ajusteSequenciaRoutes);
+app.use('/api', canaisVendaRoutes);
 
 app.use((err, _req, res, _next) => {
   logger.error('Erro não tratado: %s', err.stack || err.message);
