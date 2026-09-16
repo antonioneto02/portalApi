@@ -71,13 +71,14 @@ async function listarTodosProdutosComPolitica() {
 
 async function listarSemPolitica() {
   const pool = await getPoolPoliticas();
+  const protheusDb = process.env.DB_DATABASE_PROT || 'p11_prod';
   const result = await pool.request().query(`
     SELECT DISTINCT RTRIM(DA1.DA1_CODPRO) AS CODPROD,
            ISNULL((SELECT TOP 1 PRODUTO FROM dw.dbo.V_PRODUTOS_ATIVOS WHERE CODPROD=RTRIM(DA1.DA1_CODPRO)),'') AS PRODUTO,
            A.FAMILIA
-    FROM p11_prod..H02010 H02
-    INNER JOIN p11_prod..DA0010 DA0 ON H02.H02_CODTAB=DA0.DA0_CODTAB AND DA0.D_E_L_E_T_=''
-    INNER JOIN p11_prod..DA1010 DA1 ON DA0.DA0_CODTAB=DA1.DA1_CODTAB AND DA1.D_E_L_E_T_=''
+    FROM ${protheusDb}..H02010 H02
+    INNER JOIN ${protheusDb}..DA0010 DA0 ON H02.H02_CODTAB=DA0.DA0_CODTAB AND DA0.D_E_L_E_T_=''
+    INNER JOIN ${protheusDb}..DA1010 DA1 ON DA0.DA0_CODTAB=DA1.DA1_CODTAB AND DA1.D_E_L_E_T_=''
     INNER JOIN dw.dbo.SGC005 A ON RTRIM(DA1.DA1_CODPRO)=A.CODPROD
     WHERE DA0.D_E_L_E_T_='' AND DA0.DA0_DATDE<=CAST(GETDATE() AS DATE) AND DA0.DA0_DATATE>=CAST(GETDATE() AS DATE)
       AND DA1.DA1_ATIVO=1 AND DA1.DA1_VMINB>0
